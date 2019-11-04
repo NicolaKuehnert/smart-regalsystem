@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">File Scanner</string>
+    <string name="options">Options</string>
+    <string name="exit">Exit</string>
+    <string name="back">Back</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="settingsBluetooth">Bluetooth</string>
+    <string name="setBluetoothDesc">Select your device</string>
+    <string name="ble_not_supported">BLE is not supported on your device</string>
+    <string name="bookshelve">Smart Shelf</string>
+    <string name="headline">Smart Shelf</string>
+    <string name="tablehead">File search</string>
+    <string name="search_header">Enter the file name</string>
+    <string name="search">Search</string>
+    <string name="file_name">File Name</string>
+</resources>
