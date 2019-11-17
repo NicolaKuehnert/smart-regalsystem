@@ -2,6 +2,7 @@
 #include <M5Stack.h>
 #include "printDisplay.h"
 #include "search.h"
+#include "ble.h"
 
 State state = scan;
 
@@ -72,7 +73,7 @@ void loop() {
     printSearch();
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
-    
+    ble BLE;
   } else if (M5.BtnC.wasPressed() && state != scan)
   {
     state = scan;
