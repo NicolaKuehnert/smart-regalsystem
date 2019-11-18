@@ -14,16 +14,24 @@ uint16_t conDeviceUUID;
 void MyServerCallbacks::onConnect(BLEServer* pServer) {
     deviceConnected = true;
     conDeviceUUID = pServer->getConnId();
+    M5.Lcd.fillRect(0,140,320,50,0);
+    M5.Lcd.setCursor(70,150);
+    M5.Lcd.println("Connected");
 }
 
 void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
     deviceConnected = false;
+    M5.Lcd.fillRect(0 ,140, 320, 50 ,0);
+    M5.Lcd.setCursor(70,150);
+    M5.Lcd.println("Disconnected");
 }
 
 /*
 * Client fragt Daten an / Server schreibt Daten
 */
 void MyCallbacks::onRead(BLECharacteristic *pCharacteristic) {
+    M5.Lcd.clearDisplay();
+    M5.Lcd.println("read");
     pCharacteristic->setValue("Hello World!");
   }
   
@@ -31,6 +39,7 @@ void MyCallbacks::onRead(BLECharacteristic *pCharacteristic) {
 * Server empfängt Daten / Client schreibt Daten
 */
 void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
+    M5.Lcd.clearDisplay();
     M5.Lcd.println("write");
     std::string value = pCharacteristic->getValue();
     M5.Lcd.println(value.c_str());
@@ -66,5 +75,9 @@ ble::ble(){
 int ble::disconnect(){
     pServer->getAdvertising()->stop();
     pServer->disconnect(conDeviceUUID);
+    return 0;
+}
 
+bool ble::connected(){
+    return deviceConnected;
 }

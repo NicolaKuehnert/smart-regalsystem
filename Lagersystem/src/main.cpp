@@ -5,6 +5,9 @@
 #include "ble.h"
 
 State state = scan;
+uint32_t targetTime = 0;
+
+#define sleeptime 1
 
 /*
 *Printet das Menüfeld der Searchfunktion aus.
@@ -23,7 +26,7 @@ void printSearch(){
     M5.Lcd.println("nicht verbunden");
   } else
   {
-     M5.Lcd.setCursor(110, 100);
+     M5.Lcd.setCursor(100, 100);
     M5.Lcd.println("verbunden");
   }
   M5.Lcd.setCursor(5, 200);
@@ -53,10 +56,38 @@ void printScan(){
   M5.Lcd.println("Search");
   
 }
+
+int check(ble context){
+  int i = 0;
+  while(i <= 10)
+    {
+      if(context.connected()){
+        connected = true;
+        printSearch();
+        break;
+      } else {
+        
+        M5.Lcd.progressBar(100, 100, 100, 10, i);
+        
+        i = i+1;
+
+        sleep(1);
+        
+      }
+    }
+    if(context.connected()){
+      connected = true;
+    }
+    printSearch();
+    return 0;
+}
+
 void setup() {
   M5.begin(true, false, true);
  
   M5.Power.begin();
+
+  
   
   printScan();
 }
@@ -65,8 +96,6 @@ void loop() {
   // update button state
   M5.update();
  
-
-
   if (M5.BtnA.wasPressed() && state != search)
   {
     state = search;
@@ -74,10 +103,22 @@ void loop() {
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
     ble BLE;
+    M5.Lcd.clearDisplay();
+    M5.Lcd.setCursor(110, 50);
+    M5.Lcd.println("SEARCH");
+    M5.Lcd.setCursor(20, 200);
+    M5.Lcd.println("Bitte warten...");
+    M5.Lcd.setCursor(70,100);
+    M5.Lcd.fillRect(100,100,100,10,0);
+    check(BLE);
+    
+    
   } else if (M5.BtnC.wasPressed() && state != scan)
   {
     state = scan;
     printScan();
   }
 }
+
+
 
