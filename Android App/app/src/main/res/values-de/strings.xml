@@ -19,4 +19,8 @@
     <string name="search_header">Gib den Ordnernamen ein</string>
     <string name="search">Suche</string>
     <string name="file_name">Ordnername</string>
+    <string name="disconnect">Trennen</string>
+    <string name="attachment_summary_off">Anhänge nur herunterladen, wenn manuell angefordert</string>
+    <string name="attachment_summary_on">Automaitsch Anhänge herunterladen</string>
+    <string name="attachment_title">Lade eingehende Anhänge herunter</string>
 </resources>
