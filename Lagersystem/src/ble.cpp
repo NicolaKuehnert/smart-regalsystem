@@ -8,7 +8,7 @@ uint16_t conDeviceUUID;
 /*
 * Die Services und Charakteristiken brauchen unikate IDs
 */
-#define SERVICE_UUID        "6d350151-ab8d-4ab6-9258-078ebda04501"
+#define SERVICE_UUID        "6d350151-ab8d-4ab6-9258-078ebda04511"
 #define CHARACTERISTIC_UUID "6d350151-ab8d-4ab6-9258-078ebda04501"
 
 void MyServerCallbacks::onConnect(BLEServer* pServer) {
@@ -24,6 +24,8 @@ void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
     M5.Lcd.fillRect(0 ,140, 320, 50 ,0);
     M5.Lcd.setCursor(70,150);
     M5.Lcd.println("Disconnected");
+
+    
 }
 
 /*
@@ -42,6 +44,7 @@ void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
     M5.Lcd.clearDisplay();
     M5.Lcd.println("write");
     std::string value = pCharacteristic->getValue();
+    M5.Lcd.setCursor(10,10);
     M5.Lcd.println(value.c_str());
   }
 

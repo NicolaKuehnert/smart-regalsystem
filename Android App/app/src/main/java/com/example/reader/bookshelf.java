@@ -18,4 +18,8 @@ public class bookshelf extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
+
+    public void searchClick(View v){
+
+    }
 }
