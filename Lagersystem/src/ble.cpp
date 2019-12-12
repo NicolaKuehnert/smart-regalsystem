@@ -5,6 +5,7 @@ BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
 uint16_t conDeviceUUID;
 
+
 /*
 * Die Services und Charakteristiken brauchen unikate IDs
 */
@@ -25,8 +26,9 @@ void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
     M5.Lcd.setCursor(70,150);
     M5.Lcd.println("Disconnected");
 
-    
 }
+
+
 
 /*
 * Client fragt Daten an / Server schreibt Daten
@@ -52,8 +54,10 @@ void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
 /*
 * Initialisiere BLE und starte den GATT Server
 * Erstelle einen Service mit einer Charakteristik, die das verbundene Gerät abhören kann
+* Werde für andere Geräte sichtbar
 */
 ble::ble(){
+    
     BLEDevice::init("m5-stack");
     BLEServer *pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
@@ -68,8 +72,11 @@ ble::ble(){
     pCharacteristic->setCallbacks(new MyCallbacks());
     pCharacteristic->addDescriptor(new BLE2902());
     pService->start();
-    BLEAdvertising *pAdvertising = pServer->getAdvertising();
-    pAdvertising->start();
+
+    pServer->startAdvertising();
+
+    init = 1;
+    
 }
 
 /*

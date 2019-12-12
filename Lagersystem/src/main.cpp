@@ -6,11 +6,13 @@
 
 State state = scan;
 uint32_t targetTime = 0;
+int i_init = 0;
+
 
 #define sleeptime 1
 
 /*
-*Printet das Menüfeld der Searchfunktion aus.
+*Gibt das Menüfeld der Searchfunktion aus.
 *Diese Methode wird ausgeführt wen der "A-Knopf" gedrückt wird und der Zustand >nicht< auf "search" ist.
 */
 void printSearch(){
@@ -36,7 +38,7 @@ void printSearch(){
   
 }
 /*
-*Printet das Menüfeld der Scanfunktion aus.
+*Gibt das Menüfeld der Scanfunktion aus.
 *Diese Methode wird ausgeführt wen der "B-Knopf" gedrückt wird und der Zustand >nicht< auf "scan" ist.
 */
 void printScan(){
@@ -59,7 +61,7 @@ void printScan(){
 
 int check(ble context){
   int i = 0;
-  while(i <= 10)
+  while(i <= 100)
     {
       if(context.connected()){
         connected = true;
@@ -69,9 +71,9 @@ int check(ble context){
         
         M5.Lcd.progressBar(100, 100, 100, 10, i);
         
-        i = i+1;
+        i = i+10;
 
-        sleep(1);
+        sleep(sleeptime);
         
       }
     }
@@ -86,8 +88,6 @@ void setup() {
   M5.begin(true, false, true);
  
   M5.Power.begin();
-
-  
   
   printScan();
 }
@@ -102,16 +102,20 @@ void loop() {
     printSearch();
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
-    ble BLE;
-    M5.Lcd.clearDisplay();
-    M5.Lcd.setCursor(110, 50);
-    M5.Lcd.println("SEARCH");
-    M5.Lcd.setCursor(20, 200);
-    M5.Lcd.println("Bitte warten...");
-    M5.Lcd.setCursor(70,100);
-    M5.Lcd.fillRect(100,100,100,10,0);
-    check(BLE);
+    if(i_init == 0){
+      ble BLE;
     
+      M5.Lcd.clearDisplay();
+      M5.Lcd.setCursor(110, 50);
+      M5.Lcd.println("SEARCH");
+      M5.Lcd.setCursor(20, 200);
+      M5.Lcd.println("Bitte warten...");
+      M5.Lcd.setCursor(70,100);
+      M5.Lcd.fillRect(100,100,100,10,0);
+      check(BLE);
+      i_init = BLE.init;
+    
+    }
     
   } else if (M5.BtnC.wasPressed() && state != scan)
   {
