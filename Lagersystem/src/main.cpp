@@ -209,7 +209,11 @@ void loop() {
     
     }
     
-  } else if (M5.BtnC.wasPressed() && state != scan)
+  } else if (M5.BtnC.wasPressed() && state == search)
+  {
+    state = scan;
+    printScan();
+  } else if (M5.BtnB.wasPressed() && state == scan)
   {
     //TODO rfid scan funktion
     if (SD.exists(tokensFile) == true)
