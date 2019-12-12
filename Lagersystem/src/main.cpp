@@ -3,6 +3,7 @@
 #include "printDisplay.h"
 #include "search.h"
 #include "ble.h"
+#include "MFRC522_I2C.h"
 
 State state = scan;
 uint32_t targetTime = 0;
@@ -88,23 +89,16 @@ int check(ble context){
         FUNKTIONEN FÜR DIE SD KARTE
 ***********************************************/
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-
-    // Print blank line on screen
-    //M5.Lcd.printf(" \n  ");
-    //M5.Lcd.printf(" \n  ");
     
-    Serial.printf("Listing directory: %s\n", dirname);
-    //M5.Lcd.printf("Listing directory: %s\n", dirname);
+  Serial.printf("Listing directory: %s\n", dirname);
 
     File root = fs.open(dirname);
     if(!root){
         Serial.println("Failed to open directory");
-        //M5.Lcd.println("Failed to open directory");
         return;
     }
     if(!root.isDirectory()){
         Serial.println("Not a directory");
-        //M5.Lcd.println("Not a directory");
         return;
     }
 
@@ -112,21 +106,15 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
     while(file){
         if(file.isDirectory()){
             Serial.print("  DIR : ");
-            //M5.Lcd.print("  DIR : ");
             Serial.println(file.name());
-            //M5.Lcd.println(file.name());
             if(levels){
                 listDir(fs, file.name(), levels -1);
             }
         } else {
             Serial.print("  FILE: ");
-            //M5.Lcd.print("  FILE: ");
             Serial.print(file.name());
-            //M5.Lcd.print(file.name());
             Serial.print("  SIZE: ");
-            //M5.Lcd.print("  SIZE: ");
             Serial.println(file.size());
-            //M5.Lcd.println(file.size());
         }
         file = root.openNextFile();
     }
@@ -134,40 +122,32 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
 
 void readFile(fs::FS &fs, const char * path) {
     Serial.printf("Reading file: %s\n", path);
-    //M5.Lcd.printf("Reading file: %s\n", path);
 
     File file = fs.open(path);
     if(!file){
         Serial.println("Failed to open file for reading");
-        //M5.Lcd.println("Failed to open file for reading");
         return;
     }
 
     Serial.print("Read from file: ");
-    //M5.Lcd.print("Read from file: ");
     while(file.available()){
         int ch = file.read();
         Serial.write(ch);
-        //M5.Lcd.write(ch);
     }
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
     Serial.printf("Writing file: %s\n", path);
-    //M5.Lcd.printf("Writing file: %s\n", path);
 
     File file = fs.open(path, FILE_WRITE);
     if(!file){
         Serial.println("Failed to open file for writing");
-        //M5.Lcd.println("Failed to open file for writing");
         return;
     }
     if(file.print(message)){
         Serial.println("File written");
-        //M5.Lcd.println("File written");
     } else {
         Serial.println("Write failed");
-        //M5.Lcd.println("Write failed");
     }
 }
 
