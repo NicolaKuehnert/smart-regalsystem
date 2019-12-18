@@ -156,15 +156,41 @@ void ledtest(){
   led red(5);
   led yellow(2);
 
-  red.init();
-  yellow.init();
+  try{
+    int status = red.init();
+    if(status == 1){
+      throw 101;
+    }
+    status = yellow.init();
+    if(status == 1){
+      throw 102;
+    }
 
-  red.on();
-  sleep(sleeptime);
-  red.off();
-  yellow.on();
-  sleep(sleeptime);
-  yellow.off();
+    red.on();
+    sleep(sleeptime);
+    red.off();
+    yellow.on();
+    sleep(sleeptime);
+    yellow.off();
+
+  } catch(int i) {
+
+    switch(i){
+      case 101:
+        M5.Lcd.clearDisplay();
+        M5.Lcd.setCursor(0,0);
+        M5.Lcd.println("Error 101: Red LED not initialised");
+        break;
+      case 102:
+        M5.Lcd.clearDisplay();
+        M5.Lcd.setCursor(0,0);
+        M5.Lcd.println("Error 102: Yellow LED not initialised");
+        break;
+    }
+
+  }
+
+  
 }
 
 void setup() {
