@@ -6,4 +6,4 @@ class led {
     int off();
     private:
     int pin;
-}
+};

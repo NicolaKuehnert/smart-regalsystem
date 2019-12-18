@@ -49,14 +49,17 @@ void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
     M5.Lcd.println(value.c_str());
   }
 
+ble::ble(){
+    
+}
 
 /*
 * Initialisiere BLE und starte den GATT Server
 * Erstelle einen Service mit einer Charakteristik, die das verbundene Gerät abhören kann
 * Werde für andere Geräte sichtbar
 */
-ble::ble(){
-    
+int ble::init(){
+
     BLEDevice::init("m5-stack");
     BLEServer *pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
@@ -74,8 +77,8 @@ ble::ble(){
 
     pServer->startAdvertising();
 
-    init = 1;
-    
+    return 0;
+
 }
 
 /*

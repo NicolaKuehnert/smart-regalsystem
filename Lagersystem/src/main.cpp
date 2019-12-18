@@ -13,6 +13,7 @@ int i_init = 0;
 MFRC522 mfrc522(0x28);   // Create MFRC522 instance.
 #define sleeptime 1
 char *tokensFile = "/datenbank.txt";
+ble BLE;
 /*
 *Gibt das Menüfeld der Searchfunktion aus.
 *Diese Methode wird ausgeführt wen der "A-Knopf" gedrückt wird und der Zustand >nicht< auf "search" ist.
@@ -60,7 +61,9 @@ void printScan(){
   M5.Lcd.println("Search");
   
 }
-
+/*******************************************
+ *      FUNKTIONEN FÜR BLUETOOTH
+ ******************************************/
 int check(ble context){
   int i = 0;
   while(i <= 100)
@@ -152,6 +155,9 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
     }
 }
 
+/**************************************
+ *      FUNKTIONEN FÜR DIE LED
+ *************************************/
 void ledtest(){
   led red(5);
   led yellow(2);
@@ -193,6 +199,9 @@ void ledtest(){
   
 }
 
+/**************************************
+ *      MAIN PROGRAMM
+ *************************************/
 void setup() {
   M5.begin(true, true, true);
  
@@ -217,19 +226,19 @@ void loop() {
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
     if(i_init == 0){
-      ble BLE;
-    
-      M5.Lcd.clearDisplay();
-      M5.Lcd.setCursor(110, 50);
-      M5.Lcd.println("SEARCH");
-      M5.Lcd.setCursor(20, 200);
-      M5.Lcd.println("Bitte warten...");
-      M5.Lcd.setCursor(70,100);
-      M5.Lcd.fillRect(100,100,100,10,0);
-      check(BLE);
-      i_init = BLE.init;
-    
+      BLE.init();
+      i_init = 1;
     }
+    M5.Lcd.clearDisplay();
+    M5.Lcd.setCursor(110, 50);
+    M5.Lcd.println("SEARCH");
+    M5.Lcd.setCursor(20, 200);
+    M5.Lcd.println("Bitte warten...");
+    M5.Lcd.setCursor(70,100);
+    M5.Lcd.fillRect(100,100,100,10,0);
+    check(BLE);
+    
+    
     
   } else if (M5.BtnC.wasPressed() && state == search)
   {
