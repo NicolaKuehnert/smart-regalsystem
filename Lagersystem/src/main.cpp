@@ -3,6 +3,7 @@
 #include "printDisplay.h"
 #include "search.h"
 #include "ble.h"
+#include "led.h"
 #include "MFRC522_I2C.h"
 
 State state = scan;
@@ -151,6 +152,21 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
     }
 }
 
+void ledtest(){
+  led red(5);
+  led yellow(2);
+
+  red.init();
+  yellow.init();
+
+  red.on();
+  sleep(sleeptime);
+  red.off();
+  yellow.on();
+  sleep(sleeptime);
+  yellow.off();
+}
+
 void setup() {
   M5.begin(true, true, true);
  
@@ -195,6 +211,7 @@ void loop() {
     printScan();
   } else if (M5.BtnB.wasPressed() && state == scan)
   {
+    
     //TODO rfid scan funktion
     if (SD.exists(tokensFile) == true)
     {
@@ -215,6 +232,8 @@ void loop() {
      Serial.println("Datei nicht gefunden.");
     }
   }
+
+  
 }
 
 
