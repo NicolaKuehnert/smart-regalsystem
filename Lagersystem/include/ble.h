@@ -22,7 +22,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 
 class ble{
     public:
-      int init;
+      int init();
       ble();
       bool connected();
     private:

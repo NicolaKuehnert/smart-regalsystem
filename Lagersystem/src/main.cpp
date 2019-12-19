@@ -9,6 +9,8 @@
 //#include "MFRC522_I2C.h"
 #include "ArduinoJson.h"
 
+#include "led.h"
+
 
 State state = scan;
 uint32_t targetTime = 0;
@@ -22,6 +24,7 @@ const char *tokensFile = "/datenbank.txt";
 #define SS_PIN          10         // Configurable, see typical pin layout above
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+ble BLE;
 /*
 *Gibt das Menüfeld der Searchfunktion aus.
 *Diese Methode wird ausgeführt wen der "A-Knopf" gedrückt wird und der Zustand >nicht< auf "search" ist.
@@ -69,7 +72,9 @@ void printScan(){
   M5.Lcd.println("Search");
   
 }
-
+/*******************************************
+ *      FUNKTIONEN FÜR BLUETOOTH
+ ******************************************/
 int check(ble context){
   int i = 0;
   while(i <= 100)
@@ -241,6 +246,53 @@ void printDec(byte *buffer, byte bufferSize) {
   }
 }
 
+/**************************************
+ *      FUNKTIONEN FÜR DIE LED
+ *************************************/
+void ledtest(){
+  led red(5);
+  led yellow(2);
+
+  try{
+    int status = red.init();
+    if(status == 1){
+      throw 101;
+    }
+    status = yellow.init();
+    if(status == 1){
+      throw 102;
+    }
+
+    red.on();
+    sleep(sleeptime);
+    red.off();
+    yellow.on();
+    sleep(sleeptime);
+    yellow.off();
+
+  } catch(int i) {
+
+    switch(i){
+      case 101:
+        M5.Lcd.clearDisplay();
+        M5.Lcd.setCursor(0,0);
+        M5.Lcd.println("Error 101: Red LED not initialised");
+        break;
+      case 102:
+        M5.Lcd.clearDisplay();
+        M5.Lcd.setCursor(0,0);
+        M5.Lcd.println("Error 102: Yellow LED not initialised");
+        break;
+    }
+
+  }
+
+  
+}
+
+/**************************************
+ *      MAIN PROGRAMM
+ *************************************/
 void setup() {
   M5.begin(true, true, true);
   M5.Power.begin();
@@ -309,19 +361,19 @@ void loop() {
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
     if(i_init == 0){
-      ble BLE;
-    
-      M5.Lcd.clearDisplay();
-      M5.Lcd.setCursor(110, 50);
-      M5.Lcd.println("SEARCH");
-      M5.Lcd.setCursor(20, 200);
-      M5.Lcd.println("Bitte warten...");
-      M5.Lcd.setCursor(70,100);
-      M5.Lcd.fillRect(100,100,100,10,0);
-      check(BLE);
-      i_init = BLE.init;
-    
+      BLE.init();
+      i_init = 1;
     }
+    M5.Lcd.clearDisplay();
+    M5.Lcd.setCursor(110, 50);
+    M5.Lcd.println("SEARCH");
+    M5.Lcd.setCursor(20, 200);
+    M5.Lcd.println("Bitte warten...");
+    M5.Lcd.setCursor(70,100);
+    M5.Lcd.fillRect(100,100,100,10,0);
+    check(BLE);
+    
+    
     
   } else if (M5.BtnC.wasPressed() && state == search)
   {
@@ -329,6 +381,7 @@ void loop() {
     printScan();
   } else if (M5.BtnB.wasPressed() && state == scan)
   {
+    
     //TODO rfid scan funktion
     M5.Lcd.clear(BLACK);
     M5.Lcd.setCursor(0,0);
