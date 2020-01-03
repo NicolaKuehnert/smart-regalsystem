@@ -1,3 +1,5 @@
+#ifndef PRINTDISPLAY_H
+#define PRINTDISPLAY_H
 enum State {scan, search};
 
 /*
@@ -15,3 +17,5 @@ void printSearch();
 *Diese Methode wird ausgeführt wen der "B-Knopf" gedrückt wird und der Zustand >nicht< auf "scan" ist.
 */
 void printScan();
+
+#endif

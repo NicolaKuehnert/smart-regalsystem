@@ -1,3 +1,5 @@
+#ifndef LED_H
+#define LED_H
 class led {
     public:
     led(int lpin);
@@ -7,3 +9,4 @@ class led {
     private:
     int pin;
 };
+#endif

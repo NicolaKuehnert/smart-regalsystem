@@ -1,3 +1,6 @@
+#ifndef BLE_H
+#define BLE_H
+
 #include <M5Stack.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -28,3 +31,5 @@ class ble{
     private:
       int disconnect();
 };
+
+#endif

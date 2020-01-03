@@ -10,6 +10,7 @@
 #include "ble.h"
 #include "MFRC522_I2C.h"
 #include "led.h"
+#include "scan.h"
 
 
 
@@ -26,6 +27,7 @@ String rowLast = "";
 String row1 = " 04 6d 95 a2 ec 5a 81";
 String row2 = " 04 67 95 a2 ec 5a 81";
 bool rowScanned = false;
+String string1scan = "";
 
 ble BLE;
 /*
@@ -107,76 +109,8 @@ int check(ble context){
 /***********************************************
         FUNKTIONEN FÜR DIE SD KARTE
 ***********************************************/
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-    
-  Serial.printf("Listing directory: %s\n", dirname);
 
-    File root = fs.open(dirname);
-    if(!root){
-        Serial.println("Failed to open directory");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println("Not a directory");
-        return;
-    }
 
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
-            }
-        } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
-            M5.Lcd.print("  FILE: ");
-            M5.Lcd.print(file.name());
-            M5.Lcd.print("  SIZE: ");
-            M5.Lcd.println(file.size());
-        }
-        file = root.openNextFile();
-    }
-}
-
-void readFile(fs::FS &fs, const char * path) {
-    Serial.printf("Reading file: %s\n", path);
-    String s;
-    File file = fs.open(path);
-    if(!file){
-        Serial.println("Failed to open file for reading");
-        return;
-    }
-
-    Serial.print("Read from file: ");
-    while(file.available()){
-        int ch = file.read();
-        s = file.parseInt();
-        Serial.write(ch);
-        M5.Lcd.print(s);
-    }
-    M5.Lcd.println(s);
-    delay(10000);
-}
-
-void writeFile(fs::FS &fs, const char * path, const char * message){
-    Serial.printf("Writing file: %s\n", path);
-
-    File file = fs.open(path, FILE_WRITE);
-    if(!file){
-        Serial.println("Failed to open file for writing");
-        return;
-    }
-    if(file.print(message)){
-        Serial.println("File written");
-    } else {
-        Serial.println("Write failed");
-    }
-}
 
 /***********************************************
         FUNKTIONEN FÜR JSON MANIPULATION
@@ -394,26 +328,34 @@ void scanTag()
 
   if ( rowScanned == false)
   {
+    printScan();
     M5.Lcd.setCursor(0, 150);
     M5.Lcd.setTextSize(2);
     M5.Lcd.print("erster Scan: ");
     M5.Lcd.setCursor(145, 150);
     if (scannedTag == row1)
     {
-      M5.Lcd.println("Reihe 1");
+      string1scan = "Reihe 1";
       rowScanned = true;
       rowLast = scannedTag;
     } else if (scannedTag == row2)
     {
-      M5.Lcd.println("Reihe 2");
+      string1scan = "Reihe 2";
       rowScanned = true;
       rowLast = scannedTag;
     } else
     {
-      M5.Lcd.print("Reihe nicht gefunden");
+      string1scan = "Reihe nicht gefunden";
     }
+     M5.Lcd.print(string1scan);
   } else if (rowScanned == true)
   {
+    printScan();
+    M5.Lcd.setCursor(0, 150);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.print("erster Scan: ");
+    M5.Lcd.setCursor(145, 150);
+    M5.Lcd.print(string1scan);
     M5.Lcd.setCursor(0, 170);
     M5.Lcd.print("zweiter Scan: ");
     if (scannedTag != row1 && scannedTag != row2) 
@@ -464,12 +406,6 @@ void setup() {
     }
     file.close();
   }
- 
-  
-
- 
-
-  
   printScan();
 
 }
@@ -510,27 +446,5 @@ void loop() {
     scanTag();
   }
 }
-
-
-
-/*
-      if ( ! mfrc522.PICC_IsNewCardPresent() || ! mfrc522.PICC_ReadCardSerial() ) {
-        //delay(50);
-        return;
-      }
-
-        M5.Lcd.fillRect(0 ,140, 320, 50 ,0);
-        M5.Lcd.setCursor(70,150);
-        String test;
-      for (byte i = 0; i < mfrc522.uid.size; i++) {
-        //M5.Lcd.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        //test += (mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        //M5.Lcd.print(mfrc522.uid.uidByte[i], HEX);
-        //test += mfrc522.uid.uidByte[i];
-        M5.Lcd.print(mfrc522.uid.uidByte[i]);
-      }
-      //M5.Lcd.println(test);
-      //test.clear();
-      */
 
 
