@@ -6,7 +6,12 @@ led::led(int lpin){
 }
 
 int led::init(){
-    pinMode (pin, OUTPUT);
+    pinMode(pin, OUTPUT);
+    if(GPIO_IS_VALID_OUTPUT_GPIO(pin)){
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 int led::on(){
