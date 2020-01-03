@@ -21,13 +21,8 @@ int i_init = 0;
 // 0x28 is i2c address on SDA. Check your address with i2cscanner if not match.
 MFRC522 mfrc522(0x28);   // Create MFRC522 instance.
 #define sleeptime 1
-const char *filename = "/datenbank.txt";
-String scannedTag= "";
-String rowLast = "";
-String row1 = " 04 6d 95 a2 ec 5a 81";
-String row2 = " 04 67 95 a2 ec 5a 81";
-bool rowScanned = false;
-String string1scan = "";
+
+
 
 ble BLE;
 /*
@@ -41,15 +36,7 @@ void printSearch(){
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(110, 50);
   M5.Lcd.println("SEARCH");
-  if (connected == false)
-  {
-    M5.Lcd.setCursor(30, 100);
-    M5.Lcd.println("nicht verbunden");
-  } else
-  {
-     M5.Lcd.setCursor(100, 100);
-    M5.Lcd.println("verbunden");
-  }
+  
   M5.Lcd.setCursor(5, 200);
   M5.Lcd.println("Search");
   M5.Lcd.setCursor(230, 200);
@@ -163,7 +150,7 @@ bool saveTag(const char *filename, String &row, String book) {
   return true;
 }
 
-void searchTag(const char *filename, String &book)
+void searchTag(const char *filename, std::string &book)
 {
 
   // Open file for reading
@@ -173,7 +160,6 @@ void searchTag(const char *filename, String &book)
   // Don't forget to change the capacity to match your requirements.
   // Use arduinojson.org/v6/assistant to compute the capacity.
   StaticJsonDocument<512> doc;
-
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
   if (error)
@@ -181,12 +167,12 @@ void searchTag(const char *filename, String &book)
 
   M5.Lcd.setCursor(0, 150);
   file.close();
-  if (doc[row1].getMember(book) != NULL)
+  if (doc[row1].getMember(book.c_str()) != NULL)
   {
     M5.Lcd.println("reihe 1");
     //redLed();
   }
-  else if (doc[row2].getMember(book) != NULL)
+  else if (doc[row2].getMember(book.c_str()) != NULL)
   {
     //yellowLed();
     M5.Lcd.println("reihe 2");
@@ -418,8 +404,6 @@ void loop() {
   {
     state = search;
     printSearch();
-    String test =  " 04 4f 95 a2 ec 5a 81";
-    searchTag(filename, test);
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
     if(i_init == 0){

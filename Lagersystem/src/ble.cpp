@@ -1,5 +1,5 @@
 #include "ble.h"
-
+#include "scan.h"
 BLEServer* pServer = NULL;
 BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
@@ -15,16 +15,16 @@ uint16_t conDeviceUUID;
 void MyServerCallbacks::onConnect(BLEServer* pServer) {
     deviceConnected = true;
     conDeviceUUID = pServer->getConnId();
-    M5.Lcd.fillRect(0,140,320,50,0);
+    /*M5.Lcd.fillRect(0,140,320,50,0);
     M5.Lcd.setCursor(70,150);
-    M5.Lcd.println("Connected");
+    M5.Lcd.println("Connected");*/
 }
 
 void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
     deviceConnected = false;
-    M5.Lcd.fillRect(0 ,140, 320, 50 ,0);
+    /*M5.Lcd.fillRect(0 ,140, 320, 50 ,0);
     M5.Lcd.setCursor(70,150);
-    M5.Lcd.println("Disconnected");
+    M5.Lcd.println("Disconnected");*/
 
 }
 
@@ -46,6 +46,7 @@ void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
     M5.Lcd.clearDisplay();
     M5.Lcd.println("write");
     std::string value = pCharacteristic->getValue();
+    M5.Lcd.setCursor(0,100);
     M5.Lcd.println(value.c_str());
   }
 
