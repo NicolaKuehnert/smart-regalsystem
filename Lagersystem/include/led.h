@@ -9,4 +9,6 @@ class led {
     private:
     int pin;
 };
+void redLed();
+void yellowLed();
 #endif

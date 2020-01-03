@@ -192,22 +192,33 @@ void searchTag(const char *filename, std::string &book)
   if (error)
     Serial.println(F("Failed to read file, using default configuration"));
 
-  M5.Lcd.setCursor(0, 150);
+  M5.Lcd.setCursor(0, 80);
   file.close();
-  if (doc[row1].getMember(book.c_str()) != NULL)
+  for(int i = 0; 0 < doc[row1].size(); i++)
   {
-    M5.Lcd.println("reihe 1");
-    redLed();
+    if ( doc[row1].getElement(i) == book.c_str())
+    {
+      M5.Lcd.println("reihe 1");
+      redLed();
+      return;
+    }
   }
-  else if (doc[row2].getMember(book.c_str()) != NULL)
+
+  for(int i = 0; 0 < doc[row2].size(); i++)
   {
-    yellowLed();
-    M5.Lcd.println("reihe 2");
+        if ( doc[row2].getElement(i) == book.c_str())
+    {
+      M5.Lcd.println("reihe 2");
+    
+        //yellowLed();
+      
+      return;
+    }
   }
-  else
-  {
+  
+ 
     M5.Lcd.println("gibt es nicht");
-  }
+  
   
 }
 
@@ -296,24 +307,25 @@ led red(5);
 
 void yellowLed()
 {
-led red(5);
+led yellow(2);
 
   try{
-    int status = red.init();
+    int status = yellow.init();
     if(status == 1){
-      throw 101;
+      throw 102;
     }
-    red.on();
+
+    yellow.on();
     sleep(sleeptime);
-    red.off();
+    yellow.off();
 
   } catch(int i) {
 
     switch(i){
-      case 101:
+      case 102:
         M5.Lcd.clearDisplay();
         M5.Lcd.setCursor(0,0);
-        M5.Lcd.println("Error 101: Red LED not initialised");
+        M5.Lcd.println("Error 102: Yellow LED not initialised");
         break;
     }
 
@@ -473,6 +485,8 @@ void loop() {
   {
     state = search;
     printSearch();
+    std::string test = " 04 4f 95 a2 ec 5a 81";
+    searchTag(filename, test);
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
     if(i_init == 0){
