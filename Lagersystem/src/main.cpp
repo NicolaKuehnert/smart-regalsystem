@@ -5,12 +5,13 @@
 #include <SD.h>
 #include <ArduinoJson.h>
 
+#include "scan.h"
 #include "printDisplay.h"
 #include "search.h"
 #include "ble.h"
 #include "MFRC522_I2C.h"
 #include "led.h"
-#include "scan.h"
+
 
 
 
@@ -21,15 +22,25 @@ int i_init = 0;
 // 0x28 is i2c address on SDA. Check your address with i2cscanner if not match.
 MFRC522 mfrc522(0x28);   // Create MFRC522 instance.
 #define sleeptime 1
-
+const char *filename = "/datenbank.txt";
+String scannedTag= "";
+String rowLast = "";
+String string1scan = "";
+String row1 = " 04 6d 95 a2 ec 5a 81";
+String row2 = " 04 67 95 a2 ec 5a 81";
+bool rowScanned = false;
 
 
 ble BLE;
+
+
+
 /*
 *Gibt das Menüfeld der Searchfunktion aus.
 *Diese Methode wird ausgeführt wen der "A-Knopf" gedrückt wird und der Zustand >nicht< auf "search" ist.
 */
 void printSearch(){
+
   
   M5.Lcd.clear(BLACK);
   M5.Lcd.setTextColor(PINK);
@@ -65,6 +76,22 @@ void printScan(){
   
 }
 
+void printDelete()
+{
+  M5.Lcd.clear(BLACK);
+  M5.Lcd.setTextColor(YELLOW);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setCursor(110, 50);
+  M5.Lcd.println("SCAN");
+  M5.Lcd.setCursor(0, 100);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.println("Halte den mittleren Knopf gedrueckt um zu scannen");
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setCursor(230, 200);
+  M5.Lcd.println("NEIN");
+  M5.Lcd.setCursor(5, 200);
+  M5.Lcd.println("JA");
+}
 /*******************************************
  *      FUNKTIONEN FÜR BLUETOOTH
  ******************************************/
@@ -170,11 +197,11 @@ void searchTag(const char *filename, std::string &book)
   if (doc[row1].getMember(book.c_str()) != NULL)
   {
     M5.Lcd.println("reihe 1");
-    //redLed();
+    redLed();
   }
   else if (doc[row2].getMember(book.c_str()) != NULL)
   {
-    //yellowLed();
+    yellowLed();
     M5.Lcd.println("reihe 2");
   }
   else
@@ -184,6 +211,36 @@ void searchTag(const char *filename, std::string &book)
   
 }
 
+bool deleteTag(const char *filename, String &book)
+{
+  File file = SD.open(filename);
+  StaticJsonDocument<520> doc;
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+    Serial.println(F("Failed to read file, using default configuration"));
+
+  M5.Lcd.setCursor(0, 150);
+  file.close();
+  if (doc[row1].getMember(book) != NULL)
+  {
+    doc[row1].remove(book);
+  }
+  else if (doc[row2].getMember(book) != NULL)
+  {
+    doc[row2].remove(book);
+  }
+  else
+  {
+    M5.Lcd.println("gibt es nicht");
+    return false;
+  }
+  file = SD.open(filename, FILE_WRITE);
+  if (serializeJson(doc, file) == 0) {
+    M5.Lcd.println(F("Failed to write to file"));
+  }
+  file.close();
+  return true;
+}
 // Prints the content of a file to the Serial
 void printFile(const char *filename) {
   // Open file for reading
@@ -209,24 +266,19 @@ void printFile(const char *filename) {
 void redLed()
 {
 led red(5);
-  led yellow(2);
+  
 
   try{
     int status = red.init();
     if(status == 1){
       throw 101;
     }
-    status = yellow.init();
-    if(status == 1){
-      throw 102;
-    }
+    
 
     red.on();
     sleep(sleeptime);
     red.off();
-    yellow.on();
-    sleep(sleeptime);
-    yellow.off();
+    
 
   } catch(int i) {
 
@@ -236,11 +288,7 @@ led red(5);
         M5.Lcd.setCursor(0,0);
         M5.Lcd.println("Error 101: Red LED not initialised");
         break;
-      case 102:
-        M5.Lcd.clearDisplay();
-        M5.Lcd.setCursor(0,0);
-        M5.Lcd.println("Error 102: Yellow LED not initialised");
-        break;
+      
     }
 
   }
@@ -298,7 +346,7 @@ void ledtest(){
   }
 }
 
-void scanTag()
+void scanTag(int option)
 {
   if ( ! mfrc522.PICC_IsNewCardPresent() || ! mfrc522.PICC_ReadCardSerial() ) {
     delay(50);
@@ -311,57 +359,78 @@ void scanTag()
     scannedTag += String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
     scannedTag += String(mfrc522.uid.uidByte[i], HEX);
   }
-
-  if ( rowScanned == false)
+  if (option == 0)
   {
-    printScan();
-    M5.Lcd.setCursor(0, 150);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("erster Scan: ");
-    M5.Lcd.setCursor(145, 150);
-    if (scannedTag == row1)
+    if (rowScanned == false)
     {
-      string1scan = "Reihe 1";
-      rowScanned = true;
-      rowLast = scannedTag;
-    } else if (scannedTag == row2)
+      printScan();
+      M5.Lcd.setCursor(0, 150);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.print("erster Scan: ");
+      M5.Lcd.setCursor(145, 150);
+      if (scannedTag == row1)
+      {
+        string1scan = "Reihe 1";
+        rowScanned = true;
+        rowLast = scannedTag;
+      } else if (scannedTag == row2)
+      {
+        string1scan = "Reihe 2";
+        rowScanned = true;
+        rowLast = scannedTag;
+      } else
+      {
+        string1scan = "Reihe nicht gefunden";
+      }
+      M5.Lcd.print(string1scan);
+    } else if (rowScanned == true)
     {
-      string1scan = "Reihe 2";
-      rowScanned = true;
-      rowLast = scannedTag;
-    } else
-    {
-      string1scan = "Reihe nicht gefunden";
-    }
-     M5.Lcd.print(string1scan);
-  } else if (rowScanned == true)
-  {
-    printScan();
-    M5.Lcd.setCursor(0, 150);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("erster Scan: ");
-    M5.Lcd.setCursor(145, 150);
-    M5.Lcd.print(string1scan);
-    M5.Lcd.setCursor(0, 170);
-    M5.Lcd.print("zweiter Scan: ");
-    if (scannedTag != row1 && scannedTag != row2) 
-    {
-      if(saveTag(filename, rowLast, scannedTag) == true)
+      printScan();
+      M5.Lcd.setCursor(0, 150);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.print("erster Scan: ");
+      M5.Lcd.setCursor(145, 150);
+      M5.Lcd.print(string1scan);
+      M5.Lcd.setCursor(0, 170);
+      M5.Lcd.print("zweiter Scan: ");
+      if (scannedTag != row1 && scannedTag != row2) 
+      {
+        if(saveTag(filename, rowLast, scannedTag) == true)
+        {
+          M5.Lcd.setCursor(150, 170);
+          M5.Lcd.print(scannedTag);
+          //printFile(filename);
+          rowScanned = false;
+        }
+      } else 
       {
         M5.Lcd.setCursor(150, 170);
-        M5.Lcd.print(scannedTag);
-          //printFile(filename);
-        rowScanned = false;
+        M5.Lcd.print("Kein Ordner");
       }
-    } else 
-    {
-      M5.Lcd.setCursor(150, 170);
-      M5.Lcd.print("Kein Ordner");
     }
-   }
-    scannedTag.clear();
-    delay(1000);
+  } else if(option == 1)
+  {
+    printDelete();
+    M5.Lcd.setCursor(0, 150);
+    M5.Lcd.setTextSize(2);
+    if(scannedTag != row1 && scannedTag != row2)
+    {
+      M5.Lcd.println(scannedTag);
+      M5.Lcd.println("wirklich löschen?");
+      if(M5.BtnA.wasPressed())
+      {
+        deleteTag(filename, scannedTag);
+      } else if (M5.BtnC.wasPressed())
+      {
+        printScan();
+      }
+    }
+  }
+  scannedTag.clear();
+  delay(1000);
 }
+
+
 /**************************************
  *      MAIN PROGRAMM
  *************************************/
@@ -427,7 +496,10 @@ void loop() {
     printScan();
   } else if (M5.BtnB.wasPressed() && state == scan)
   {
-    scanTag();
+    scanTag(0);
+  } else if (M5.BtnC.wasPressed() && state == scan)
+  {
+    scanTag(1);
   }
 }
 

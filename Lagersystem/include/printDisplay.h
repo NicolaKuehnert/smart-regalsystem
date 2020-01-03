@@ -18,4 +18,6 @@ void printSearch();
 */
 void printScan();
 
+void printDelete();
+
 #endif

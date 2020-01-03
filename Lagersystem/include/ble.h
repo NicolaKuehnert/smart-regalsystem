@@ -23,6 +23,11 @@ class MyCallbacks: public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *pCharacteristic);
 };
 
+class MyFileCallbacks: public BLECharacteristicCallbacks {
+  void onRead(BLECharacteristic *pCharacteristic);
+  void onWrite(BLECharacteristic *pCharacteristic);
+};
+
 class ble{
     public:
       int init();
