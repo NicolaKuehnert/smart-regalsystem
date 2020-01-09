@@ -29,7 +29,7 @@ String string1scan = "";
 String row1 = " 04 6d 95 a2 ec 5a 81";
 String row2 = " 04 67 95 a2 ec 5a 81";
 bool rowScanned = false;
-
+tag currentTag;
 
 ble BLE;
 
@@ -132,7 +132,7 @@ int check(ble context){
 
 
 // Loads the configuration from a file
-bool saveTag(const char *filename, String &row, String book) {
+bool saveTag(const char *filename, String &row, String book, tag tagy) {
   // Open file for reading
   File file = SD.open(filename);
 
@@ -153,7 +153,9 @@ bool saveTag(const char *filename, String &row, String book) {
     //M5.Lcd.println(doc[row].getMember(i));
     if (doc[row1].getElement(i) == book)
     {
+
       M5.Lcd.println("gibes schon");
+      
       return false;
     }
   }
@@ -169,7 +171,10 @@ bool saveTag(const char *filename, String &row, String book) {
     }
   }
   file = SD.open(filename, FILE_WRITE);
-  doc[row].add(book);
+  doc[row].add(tagy.name);
+  M5.Lcd.setCursor(0,0);
+  M5.Lcd.print (tagy.name);
+  //doc[row].getElement(0).add("test");
   if (serializeJson(doc, file) == 0) {
     M5.Lcd.println(F("Failed to write to file"));
   }
@@ -179,7 +184,6 @@ bool saveTag(const char *filename, String &row, String book) {
 
 void searchTag(const char *filename, std::string &book)
 {
-
   // Open file for reading
   File file = SD.open(filename);
 
@@ -198,8 +202,10 @@ void searchTag(const char *filename, std::string &book)
   {
     if ( doc[row1].getElement(i) == book.c_str())
     {
+      M5.Lcd.print("");
       M5.Lcd.println("reihe 1");
-      redLed();
+      printFile(filename);
+      //redLed();
       return;
     }
   }
@@ -358,24 +364,27 @@ void ledtest(){
   }
 }
 
-void scanTag(int option)
+void scanTag(int option, tag currentTag)
 {
   if ( ! mfrc522.PICC_IsNewCardPresent() || ! mfrc522.PICC_ReadCardSerial() ) {
     delay(50);
     return;
   }
-
+  tag test;
   M5.Lcd.println(" ");
   for (byte i = 0; i < mfrc522.uid.size; i++)
   {
     scannedTag += String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
     scannedTag += String(mfrc522.uid.uidByte[i], HEX);
   }
+
+ 
   if (option == 0)
   {
     if (rowScanned == false)
     {
       printScan();
+
       M5.Lcd.setCursor(0, 150);
       M5.Lcd.setTextSize(2);
       M5.Lcd.print("erster Scan: ");
@@ -407,7 +416,28 @@ void scanTag(int option)
       M5.Lcd.print("zweiter Scan: ");
       if (scannedTag != row1 && scannedTag != row2) 
       {
-        if(saveTag(filename, rowLast, scannedTag) == true)
+          byte *buffer = (byte*) "ord2";
+  byte page = (byte)3;
+  byte size = sizeof(buffer);
+  M5.Lcd.setCursor(0,0);
+  if (mfrc522.MIFARE_Ultralight_Write(page, buffer, size) == 1)
+  {
+    byte buffer2[18];
+    byte blockaddr = byte(3);
+    byte size2 = sizeof(buffer2);
+    byte *ptrsize2 = &size2;
+    mfrc522.MIFARE_Read(blockaddr, buffer2, ptrsize2);
+    M5.Lcd.print(" ");
+    mfrc522.MIFARE_Ultralight_Write(page, buffer, size);
+    
+    test.name.clear();
+    for(int i = 0; i < sizeof(buffer2)-1; i++)
+    {
+      test.name +=  (char)buffer2[i];
+    }
+   //M5.Lcd.print(test.name);
+  }
+        if(saveTag(filename, rowLast, scannedTag, test) == true)
         {
           M5.Lcd.setCursor(150, 170);
           M5.Lcd.print(scannedTag);
@@ -475,6 +505,7 @@ void setup() {
   }
   printScan();
 
+
 }
 
 void loop() {
@@ -510,10 +541,10 @@ void loop() {
     printScan();
   } else if (M5.BtnB.wasPressed() && state == scan)
   {
-    scanTag(0);
+    scanTag(0, currentTag);
   } else if (M5.BtnC.wasPressed() && state == scan)
   {
-    scanTag(1);
+    scanTag(1, currentTag);
   }
 }
 
