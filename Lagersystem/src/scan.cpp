@@ -157,42 +157,6 @@ bool deleteTag(const char *filename, tag *book)
 return false;
 }
 
-// Prints the content of a file to the Serial
-void printFile(const char *filename) {
-  // Open file for reading
-  File file = SD.open(filename);
-  if (!file) {
-    M5.Lcd.println(F("Failed to read file"));
-    return;
-  }
-
-  // Extract each characters by one by one
-  while (file.available()) {
-    M5.Lcd.print((char)file.read());
-  }
-  M5.Lcd.println();
-
-  // Close the file
-  file.close();
-}
-
-bool writeTag (const char* text)
-{
-
-    if(sizeof(text)>BUF_SIZE-PARITY_SIZE){
-        return false;
-    }
-
-    byte buffer[BUF_SIZE];
-
-    memcpy(buffer,text,BUF_SIZE-PARITY_SIZE);
-
-    for (int i=0; i < 4; i++) {
-        mfrc522.MIFARE_Ultralight_Write(pageAddr+i, &buffer[i*PAGE_SIZE], PAGE_SIZE);
-    }
-    return true;
-}
-
 char* readTag(){
 
     byte buffer[BUF_SIZE] = {0};
