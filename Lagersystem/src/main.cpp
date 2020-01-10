@@ -13,27 +13,13 @@
 #include "led.h"
 
 
-
-
-
 State state = scan;
 uint32_t targetTime = 0;
 int i_init = 0;
-// 0x28 is i2c address on SDA. Check your address with i2cscanner if not match.
-MFRC522 mfrc522(0x28);   // Create MFRC522 instance.
-#define sleeptime 1
 const char *filename = "/datenbank.txt";
 String scannedTag= "";
-String rowLast = "";
-String string1scan = "";
-String row1 = " 04 6d 95 a2 ec 5a 81";
-String row2 = " 04 67 95 a2 ec 5a 81";
-bool rowScanned = false;
-tag currentTag;
 
 ble BLE;
-
-
 
 /*
 *Gibt das Menüfeld der Searchfunktion aus.
@@ -43,15 +29,16 @@ void printSearch(){
 
   
   M5.Lcd.clear(BLACK);
-  M5.Lcd.setTextColor(PINK);
   M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(110, 50);
-  M5.Lcd.println("SEARCH");
-  
-  M5.Lcd.setCursor(5, 200);
-  M5.Lcd.println("Search");
+  M5.Lcd.setTextColor(YELLOW);
   M5.Lcd.setCursor(230, 200);
   M5.Lcd.println("Scan");
+  M5.Lcd.setTextColor(PINK);
+  M5.Lcd.setCursor(110, 50);
+  M5.Lcd.println("SEARCH");
+  M5.Lcd.setCursor(5, 200);
+  M5.Lcd.println("Search");
+
   
 }
 /*
@@ -61,18 +48,19 @@ void printSearch(){
 void printScan(){
   
   M5.Lcd.clear(BLACK);
-  M5.Lcd.setTextColor(YELLOW);
+  M5.Lcd.setTextColor(PINK);
   M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(110, 50);
-  M5.Lcd.println("SCAN");
-  M5.Lcd.setCursor(0, 100);
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.println("Halte den mittleren Knopf gedrueckt um zu scannen");
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(230, 200);
-  M5.Lcd.println("Scan");
   M5.Lcd.setCursor(5, 200);
   M5.Lcd.println("Search");
+  M5.Lcd.setTextColor(YELLOW);
+  M5.Lcd.setCursor(110, 50);
+  M5.Lcd.println("SCAN");
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setCursor(230, 200);
+  M5.Lcd.println("Del");
+  M5.Lcd.setCursor(150, 200);
+  M5.Lcd.println("Add");
+
   
 }
 
@@ -84,13 +72,14 @@ void printDelete()
   M5.Lcd.setCursor(110, 50);
   M5.Lcd.println("SCAN");
   M5.Lcd.setCursor(0, 100);
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.println("Halte den mittleren Knopf gedrueckt um zu scannen");
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(230, 200);
+  M5.Lcd.setTextColor(RED);
   M5.Lcd.println("NEIN");
   M5.Lcd.setCursor(5, 200);
+  M5.Lcd.setTextColor(GREEN);
   M5.Lcd.println("JA");
+  M5.Lcd.setTextColor(YELLOW);
 }
 /*******************************************
  *      FUNKTIONEN FÜR BLUETOOTH
@@ -120,359 +109,6 @@ int check(ble context){
     return 0;
 }
 
-/***********************************************
-        FUNKTIONEN FÜR DIE SD KARTE
-***********************************************/
-
-
-
-/***********************************************
-        FUNKTIONEN FÜR JSON MANIPULATION
-***********************************************/
-
-
-// Loads the configuration from a file
-bool saveTag(const char *filename, String &row, String book, tag tagy) {
-  // Open file for reading
-  File file = SD.open(filename);
-
-  // Allocate a temporary JsonDocument
-  // Don't forget to change the capacity to match your requirements.
-  // Use arduinojson.org/v6/assistant to compute the capacity.
-  StaticJsonDocument<512> doc;
-
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-    Serial.println(F("Failed to read file, using default configuration"));
-
-  file.close();
-
-  for (int i = 0; i < doc[row1].size(); i++)
-  {
-    //M5.Lcd.println(doc[row].getMember(i));
-    if (doc[row1].getElement(i) == book)
-    {
-
-      M5.Lcd.println("gibes schon");
-      
-      return false;
-    }
-  }
-
-  for (int i = 0; i < doc[row2].size(); i++)
-  {
-   
-    //M5.Lcd.println(doc[row].getMember(i));
-    if (doc[row2].getElement(i) == book)
-    {
-      M5.Lcd.println("gibes schon");
-      return false;
-    }
-  }
-  file = SD.open(filename, FILE_WRITE);
-  doc[row].add(tagy.name);
-  M5.Lcd.setCursor(0,0);
-  M5.Lcd.print (tagy.name);
-  //doc[row].getElement(0).add("test");
-  if (serializeJson(doc, file) == 0) {
-    M5.Lcd.println(F("Failed to write to file"));
-  }
-  file.close();
-  return true;
-}
-
-void searchTag(const char *filename, std::string &book)
-{
-  // Open file for reading
-  File file = SD.open(filename);
-
-  // Allocate a temporary JsonDocument
-  // Don't forget to change the capacity to match your requirements.
-  // Use arduinojson.org/v6/assistant to compute the capacity.
-  StaticJsonDocument<512> doc;
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-    Serial.println(F("Failed to read file, using default configuration"));
-
-  M5.Lcd.setCursor(0, 80);
-  file.close();
-  for(int i = 0; 0 < doc[row1].size(); i++)
-  {
-    if ( doc[row1].getElement(i) == book.c_str())
-    {
-      M5.Lcd.print("");
-      M5.Lcd.println("reihe 1");
-      printFile(filename);
-      //redLed();
-      return;
-    }
-  }
-
-  for(int i = 0; 0 < doc[row2].size(); i++)
-  {
-        if ( doc[row2].getElement(i) == book.c_str())
-    {
-      M5.Lcd.println("reihe 2");
-    
-        //yellowLed();
-      
-      return;
-    }
-  }
-  
- 
-    M5.Lcd.println("gibt es nicht");
-  
-  
-}
-
-bool deleteTag(const char *filename, String &book)
-{
-  File file = SD.open(filename);
-  StaticJsonDocument<520> doc;
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-    Serial.println(F("Failed to read file, using default configuration"));
-
-  M5.Lcd.setCursor(0, 150);
-  file.close();
-  if (doc[row1].getMember(book) != NULL)
-  {
-    doc[row1].remove(book);
-  }
-  else if (doc[row2].getMember(book) != NULL)
-  {
-    doc[row2].remove(book);
-  }
-  else
-  {
-    M5.Lcd.println("gibt es nicht");
-    return false;
-  }
-  file = SD.open(filename, FILE_WRITE);
-  if (serializeJson(doc, file) == 0) {
-    M5.Lcd.println(F("Failed to write to file"));
-  }
-  file.close();
-  return true;
-}
-// Prints the content of a file to the Serial
-void printFile(const char *filename) {
-  // Open file for reading
-  File file = SD.open(filename);
-  if (!file) {
-    M5.Lcd.println(F("Failed to read file"));
-    return;
-  }
-
-  // Extract each characters by one by one
-  while (file.available()) {
-    M5.Lcd.print((char)file.read());
-  }
-  M5.Lcd.println();
-
-  // Close the file
-  file.close();
-}
-
-/**************************************
- *      FUNKTIONEN FÜR DIE LED
- *************************************/
-void redLed()
-{
-led red(5);
-  
-
-  try{
-    int status = red.init();
-    if(status == 1){
-      throw 101;
-    }
-    
-
-    red.on();
-    sleep(sleeptime);
-    red.off();
-    
-
-  } catch(int i) {
-
-    switch(i){
-      case 101:
-        M5.Lcd.clearDisplay();
-        M5.Lcd.setCursor(0,0);
-        M5.Lcd.println("Error 101: Red LED not initialised");
-        break;
-      
-    }
-
-  }
-}
-
-void yellowLed()
-{
-led yellow(2);
-
-  try{
-    int status = yellow.init();
-    if(status == 1){
-      throw 102;
-    }
-
-    yellow.on();
-    sleep(sleeptime);
-    yellow.off();
-
-  } catch(int i) {
-
-    switch(i){
-      case 102:
-        M5.Lcd.clearDisplay();
-        M5.Lcd.setCursor(0,0);
-        M5.Lcd.println("Error 102: Yellow LED not initialised");
-        break;
-    }
-
-  }
-}
-void ledtest(){
-  
-  led yellow(2);
-
-  try{
-    int status = yellow.init();
-    if(status == 1){
-      throw 102;
-    }
-
-    yellow.on();
-    sleep(sleeptime);
-    yellow.off();
-
-  } catch(int i) {
-
-    switch(i){
-      case 102:
-        M5.Lcd.clearDisplay();
-        M5.Lcd.setCursor(0,0);
-        M5.Lcd.println("Error 102: Yellow LED not initialised");
-        break;
-    }
-
-  }
-}
-
-void scanTag(int option, tag currentTag)
-{
-  if ( ! mfrc522.PICC_IsNewCardPresent() || ! mfrc522.PICC_ReadCardSerial() ) {
-    delay(50);
-    return;
-  }
-  tag test;
-  M5.Lcd.println(" ");
-  for (byte i = 0; i < mfrc522.uid.size; i++)
-  {
-    scannedTag += String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-    scannedTag += String(mfrc522.uid.uidByte[i], HEX);
-  }
-
- 
-  if (option == 0)
-  {
-    if (rowScanned == false)
-    {
-      printScan();
-
-      M5.Lcd.setCursor(0, 150);
-      M5.Lcd.setTextSize(2);
-      M5.Lcd.print("erster Scan: ");
-      M5.Lcd.setCursor(145, 150);
-      if (scannedTag == row1)
-      {
-        string1scan = "Reihe 1";
-        rowScanned = true;
-        rowLast = scannedTag;
-      } else if (scannedTag == row2)
-      {
-        string1scan = "Reihe 2";
-        rowScanned = true;
-        rowLast = scannedTag;
-      } else
-      {
-        string1scan = "Reihe nicht gefunden";
-      }
-      M5.Lcd.print(string1scan);
-    } else if (rowScanned == true)
-    {
-      printScan();
-      M5.Lcd.setCursor(0, 150);
-      M5.Lcd.setTextSize(2);
-      M5.Lcd.print("erster Scan: ");
-      M5.Lcd.setCursor(145, 150);
-      M5.Lcd.print(string1scan);
-      M5.Lcd.setCursor(0, 170);
-      M5.Lcd.print("zweiter Scan: ");
-      if (scannedTag != row1 && scannedTag != row2) 
-      {
-          byte *buffer = (byte*) "ord2";
-  byte page = (byte)3;
-  byte size = sizeof(buffer);
-  M5.Lcd.setCursor(0,0);
-  if (mfrc522.MIFARE_Ultralight_Write(page, buffer, size) == 1)
-  {
-    byte buffer2[18];
-    byte blockaddr = byte(3);
-    byte size2 = sizeof(buffer2);
-    byte *ptrsize2 = &size2;
-    mfrc522.MIFARE_Read(blockaddr, buffer2, ptrsize2);
-    M5.Lcd.print(" ");
-    mfrc522.MIFARE_Ultralight_Write(page, buffer, size);
-    
-    test.name.clear();
-    for(int i = 0; i < sizeof(buffer2)-1; i++)
-    {
-      test.name +=  (char)buffer2[i];
-    }
-   //M5.Lcd.print(test.name);
-  }
-        if(saveTag(filename, rowLast, scannedTag, test) == true)
-        {
-          M5.Lcd.setCursor(150, 170);
-          M5.Lcd.print(scannedTag);
-          //printFile(filename);
-          rowScanned = false;
-        }
-      } else 
-      {
-        M5.Lcd.setCursor(150, 170);
-        M5.Lcd.print("Kein Ordner");
-      }
-    }
-  } else if(option == 1)
-  {
-    printDelete();
-    M5.Lcd.setCursor(0, 150);
-    M5.Lcd.setTextSize(2);
-    if(scannedTag != row1 && scannedTag != row2)
-    {
-      M5.Lcd.println(scannedTag);
-      M5.Lcd.println("wirklich löschen?");
-      if(M5.BtnA.wasPressed())
-      {
-        deleteTag(filename, scannedTag);
-      } else if (M5.BtnC.wasPressed())
-      {
-        printScan();
-      }
-    }
-  }
-  scannedTag.clear();
-  delay(1000);
-}
-
-
 /**************************************
  *      MAIN PROGRAMM
  *************************************/
@@ -480,7 +116,7 @@ void setup() {
   M5.begin(true, true, true);
   M5.Power.begin();
   Wire.begin();
-  mfrc522.PCD_Init();
+  rfidInit();
   
   // Initialize SD library
   while (!SD.begin()) {
@@ -492,7 +128,7 @@ void setup() {
   {
     StaticJsonDocument<200> doc;
     char json[] =
-      "{\" 04 6d 95 a2 ec 5a 81\":[],\" 04 67 95 a2 ec 5a 81\":[]}";
+      "{\"Reihe1\":[],\"Reihe2\":[]}";
 
     // Deserialize the JSON document
     deserializeJson(doc, json);
@@ -516,8 +152,6 @@ void loop() {
   {
     state = search;
     printSearch();
-    std::string test = " 04 4f 95 a2 ec 5a 81";
-    searchTag(filename, test);
   } else if (M5.BtnB.wasPressed() && state != scan)
   {
     if(i_init == 0){
@@ -541,10 +175,16 @@ void loop() {
     printScan();
   } else if (M5.BtnB.wasPressed() && state == scan)
   {
-    scanTag(0, currentTag);
+    scanTag(0);
   } else if (M5.BtnC.wasPressed() && state == scan)
   {
-    scanTag(1, currentTag);
+    scanTag(1);
+  } else if (M5.BtnA.wasPressed() && state == del)
+  {
+
+  } else if (M5.BtnC.wasPressed() && state == del)
+  {
+    
   }
 }
 

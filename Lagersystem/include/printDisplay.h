@@ -1,6 +1,6 @@
 #ifndef PRINTDISPLAY_H
 #define PRINTDISPLAY_H
-enum State {scan, search};
+enum State {scan, search, del};
 
 /*
 *Printet das Menüfeld der Menufunktion aus.

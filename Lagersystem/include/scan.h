@@ -2,13 +2,26 @@
 #ifndef SCAN_H
 #define SCAN_H
 
+#include <Arduino.h>
+#include <M5Stack.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <SD.h>
+#include <ArduinoJson.h>
+
+
+#include "MFRC522_I2C.h"
+#include "led.h"
+#include "printDisplay.h"
+
+#define RFID_ADDRESS 0x28
+#define BUF_SIZE 18
+#define PARITY_SIZE 2
+#define PAGE_SIZE 4
+
 extern const char *filename;
 extern String scannedTag;
-extern String rowLast;
-extern String string1scan;
-extern String row1;;
-extern String row2;
-extern bool rowScanned;
+
 struct tag
 {
     String uid;
@@ -96,12 +109,13 @@ enum ascii:byte {
     UMLAUT_U = 0xF5    
 };
   
-
-void scanTag(int option, tag currentTag);
+bool checkBook(tag *book, StaticJsonDocument<520> doc);
+void scanTag(int option);
 void searchTag(const char *filename, std::string &book);
-bool saveTag(const char *filename, String &row, String book, tag currentTag);
+String saveTag(const char *filename, tag *row, tag *book);
 void printFile(const char *filename);
-bool deleteTag(const char *filename, String &book);
+bool deleteTag(const char *filename, tag *book);
+void rfidInit();
 
 
 #endif
