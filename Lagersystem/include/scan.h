@@ -115,6 +115,8 @@ void searchTag(const char *filename, std::string &book);
 String saveTag(const char *filename, tag *row, tag *book);
 void printFile(const char *filename);
 bool deleteTag(const char *filename, tag *book);
+bool writeTag (const char* text);
+char* readTag();
 void rfidInit();
 
 
