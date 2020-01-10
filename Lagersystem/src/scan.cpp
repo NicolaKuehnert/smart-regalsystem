@@ -299,7 +299,7 @@ void scanTag(int option)
                 bookTag->name = tagName;
                 if(deleteTag(filename, bookTag) == true)
                 {
-                    M5.Lcd.println("Erfolgreich gelöscht");
+                    M5.Lcd.println("Erfolgreich geloescht");
                         
                 }
                 else
