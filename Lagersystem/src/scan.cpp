@@ -89,7 +89,7 @@ void searchTag(const char *filename, std::string &book)
     {
       M5.Lcd.print("Ihr Ordner is in der ");
       M5.Lcd.println("reihe 1");
-      //redLed();
+      redLed();
       return;
     }
   }
@@ -100,7 +100,7 @@ void searchTag(const char *filename, std::string &book)
     {
         M5.Lcd.print("Ihr Ordner is in der ");
         M5.Lcd.println("reihe 2");
-        //yellowLed();
+        yellowLed();
         return;
     }
   }
@@ -262,7 +262,6 @@ void scanTag(int option)
             delete bookTag;
             rowTag = nullptr;
             bookTag = nullptr;
-            printFile(filename);
         }
         else
         {

@@ -123,8 +123,7 @@ void setup() {
     Serial.println(F("Failed to initialize SD library"));
     delay(1000);
   }
-  SD.remove(filename);
-  if (! SD.exists(filename))
+  if (!SD.exists(filename))
   {
     StaticJsonDocument<200> doc;
     char json[] =
@@ -179,12 +178,6 @@ void loop() {
   } else if (M5.BtnC.wasPressed() && state == scan)
   {
     scanTag(1);
-  } else if (M5.BtnA.wasPressed() && state == del)
-  {
-
-  } else if (M5.BtnC.wasPressed() && state == del)
-  {
-    
   }
 }
 
